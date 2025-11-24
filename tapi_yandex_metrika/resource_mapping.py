@@ -1,5 +1,7 @@
+from typing import Any, Dict
 
-STATS_RESOURCE_MAPPING = {
+
+STATS_RESOURCE_MAPPING: Dict[str, Dict[str, Any]] = {
     "stats": {
         "resource": "stat/v1/data",
         "docs": "https://yandex.ru/dev/metrika/doc/api2/api_v1/intro-docpage/",
@@ -26,7 +28,7 @@ STATS_RESOURCE_MAPPING = {
     },
 }
 
-LOGSAPI_RESOURCE_MAPPING = {
+LOGSAPI_RESOURCE_MAPPING: Dict[str, Dict[str, Any]] = {
     "allinfo": {
         "resource": "management/v1/counter/{counterId}/logrequests",
         "docs": "https://yandex.ru/dev/metrika/doc/api2/logs/queries/getlogrequests-docpage/",
@@ -71,7 +73,7 @@ LOGSAPI_RESOURCE_MAPPING = {
     },
 }
 
-MANAGEMENT_RESOURCE_MAPPING = {
+MANAGEMENT_RESOURCE_MAPPING: Dict[str, Dict[str, Any]] = {
     "counters": {
         "resource": "management/v1/counters",
         "docs": "https://yandex.ru/dev/metrika/doc/api2/management/counters/counters-docpage/",

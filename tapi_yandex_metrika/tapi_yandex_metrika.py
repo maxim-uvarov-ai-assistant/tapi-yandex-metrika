@@ -3,8 +3,10 @@ import logging
 import random
 import re
 import time
+from typing import Any, Dict, Generator, List, Optional, Union
 
 import orjson
+from requests import Response
 from tapi2 import TapiAdapter, generate_wrapper_from_adapter, JSONAdapterMixin
 from tapi2.exceptions import ResponseProcessException
 
@@ -17,14 +19,14 @@ from .resource_mapping import (
 
 logger = logging.getLogger(__name__)
 
-LIMIT = 10000
+LIMIT: int = 10000
 
 
 class YandexMetrikaClientAdapterAbstract(JSONAdapterMixin, TapiAdapter):
-    def get_api_root(self, api_params, resource_name):
+    def get_api_root(self, api_params: Dict[str, Any], resource_name: str) -> str:
         return "https://api-metrika.yandex.net/"
 
-    def get_request_kwargs(self, api_params, *args, **kwargs):
+    def get_request_kwargs(self, api_params: Dict[str, Any], *args: Any, **kwargs: Any) -> Dict[str, Any]:
         if "receive_all_data" in api_params:
             raise exceptions.BackwardCompatibilityError("parameter 'receive_all_data'")
 
@@ -34,39 +36,43 @@ class YandexMetrikaClientAdapterAbstract(JSONAdapterMixin, TapiAdapter):
         )
         return params
 
-    def get_error_message(self, data, response=None):
+    def get_error_message(self, data: Optional[Any], response: Optional[Response] = None) -> Dict[str, Any]:
         if data is None:
-            return {"error_text": response.content.decode()}
+            if response is not None:
+                return {"error_text": response.content.decode()}
+            return {"error_text": "Unknown error"}
         else:
             return data
 
-    def format_data_to_request(self, data):
+    def format_data_to_request(self, data: Optional[Any]) -> Optional[bytes]:
         if data:
             return orjson.dumps(data)
+        return None
 
-    def process_response(self, response, request_kwargs, **kwargs):
+    def process_response(self, response: Response, request_kwargs: Dict[str, Any], **kwargs: Any) -> Any:
         data = super().process_response(response, request_kwargs, **kwargs)
         if isinstance(data, dict) and "errors" in data:
             raise ResponseProcessException(response, data)
         return data
 
-    def response_to_native(self, response):
+    def response_to_native(self, response: Response) -> Optional[Union[Dict[str, Any], str]]:
         if response.content.strip():
             try:
                 return orjson.loads(response.content.decode())
             except ValueError:
                 return response.text
+        return None
 
     def retry_request(
         self,
-        tapi_exception,
-        error_message,
-        repeat_number,
-        response,
-        request_kwargs,
-        api_params,
-        **kwargs
-    ):
+        tapi_exception: Exception,
+        error_message: Dict[str, Any],
+        repeat_number: int,
+        response: Response,
+        request_kwargs: Dict[str, Any],
+        api_params: Dict[str, Any],
+        **kwargs: Any
+    ) -> bool:
         code = int(error_message.get("code", 0))
         message = error_message.get("message", "")
         errors_types = [i.get("error_type") for i in error_message.get("errors", [])]
@@ -123,14 +129,14 @@ class YandexMetrikaClientAdapterAbstract(JSONAdapterMixin, TapiAdapter):
 
     def error_handling(
         self,
-        tapi_exception,
-        error_message,
-        repeat_number,
-        response,
-        request_kwargs,
-        api_params,
-        **kwargs
-    ):
+        tapi_exception: Exception,
+        error_message: Dict[str, Any],
+        repeat_number: int,
+        response: Response,
+        request_kwargs: Dict[str, Any],
+        api_params: Dict[str, Any],
+        **kwargs: Any
+    ) -> None:
         if "error_text" in error_message:
             raise exceptions.YandexMetrikaApiError(
                 response, error_message["error_text"]
@@ -145,7 +151,7 @@ class YandexMetrikaClientAdapterAbstract(JSONAdapterMixin, TapiAdapter):
             else:
                 raise exceptions.YandexMetrikaClientError(response, **error_message)
 
-    def transform(self, **kwargs):
+    def transform(self, **kwargs: Any) -> None:
         raise exceptions.BackwardCompatibilityError("method 'transform'")
 
 
@@ -156,7 +162,7 @@ class YandexMetrikaManagementClientAdapter(YandexMetrikaClientAdapterAbstract):
 class YandexMetrikaLogsapiClientAdapter(YandexMetrikaClientAdapterAbstract):
     resource_mapping = LOGSAPI_RESOURCE_MAPPING
 
-    def process_response(self, response, request_kwargs, **kwargs):
+    def process_response(self, response: Response, request_kwargs: Dict[str, Any], **kwargs: Any) -> Any:
         data = super().process_response(response, request_kwargs, **kwargs)
         if "download" in request_kwargs["url"]:
             kwargs["store"]["columns"] = data[: data.find("\n")].split("\t")
@@ -166,14 +172,14 @@ class YandexMetrikaLogsapiClientAdapter(YandexMetrikaClientAdapterAbstract):
 
     def error_handling(
         self,
-        tapi_exception,
-        error_message,
-        repeat_number,
-        response,
-        request_kwargs,
-        api_params,
-        **kwargs
-    ):
+        tapi_exception: Exception,
+        error_message: Dict[str, Any],
+        repeat_number: int,
+        response: Response,
+        request_kwargs: Dict[str, Any],
+        api_params: Dict[str, Any],
+        **kwargs: Any
+    ) -> None:
         message = error_message.get("message")
         if message == "Incorrect part number":
             # Fires when trying to download a non-existent part of a report.
@@ -192,7 +198,7 @@ class YandexMetrikaLogsapiClientAdapter(YandexMetrikaClientAdapterAbstract):
             **kwargs
         )
 
-    def _check_status_report(self, response, api_params, **kwargs):
+    def _check_status_report(self, response: Response, api_params: Dict[str, Any], **kwargs: Any) -> None:
         request_id = api_params["default_url_params"]["requestId"]
         if kwargs["store"].get(request_id) is None:
             client = kwargs["client"]
@@ -207,14 +213,14 @@ class YandexMetrikaLogsapiClientAdapter(YandexMetrikaClientAdapterAbstract):
 
     def retry_request(
         self,
-        tapi_exception,
-        error_message,
-        repeat_number,
-        response,
-        request_kwargs,
-        api_params,
-        **kwargs,
-    ):
+        tapi_exception: Exception,
+        error_message: Dict[str, Any],
+        repeat_number: int,
+        response: Response,
+        request_kwargs: Dict[str, Any],
+        api_params: Dict[str, Any],
+        **kwargs: Any,
+    ) -> bool:
         """
         Conditions for repeating a request. If it returns True, the request will be repeated.
         """
@@ -246,14 +252,14 @@ class YandexMetrikaLogsapiClientAdapter(YandexMetrikaClientAdapterAbstract):
             **kwargs,
         )
 
-    def fill_resource_template_url(self, template, params, resource):
+    def fill_resource_template_url(self, template: str, params: Dict[str, Any], resource: str) -> str:
         if resource == "download" and not params.get("partNumber"):
             params.update(partNumber=0)
         return super().fill_resource_template_url(template, params, resource)
 
     def get_iterator_next_request_kwargs(
-        self, response_data, response, request_kwargs, api_params, **kwargs
-    ):
+        self, response_data: Any, response: Response, request_kwargs: Dict[str, Any], api_params: Dict[str, Any], **kwargs: Any
+    ) -> Dict[str, Any]:
         url = request_kwargs["url"]
 
         if "download" not in url:
@@ -264,7 +270,7 @@ class YandexMetrikaLogsapiClientAdapter(YandexMetrikaClientAdapterAbstract):
         new_url = re.sub(r"part/[0-9]*/", "part/{}/".format(next_part), url)
         return {**request_kwargs, "url": new_url}
 
-    def _iter_line(self, text, **kwargs):
+    def _iter_line(self, text: str, **kwargs: Any) -> Generator[str, None, None]:
         if "download" not in kwargs["request_kwargs"]["url"]:
             raise NotImplementedError("Only available for download resource responses")
 
@@ -272,74 +278,74 @@ class YandexMetrikaLogsapiClientAdapter(YandexMetrikaClientAdapterAbstract):
         next(f)  # skipping columns
         return (line.replace("\n", "") for line in f)
 
-    def get_iterator_iteritems(self, response_data, **kwargs):
+    def get_iterator_iteritems(self, response_data: Any, **kwargs: Any) -> Union[Generator[str, None, None], List[Any]]:
         if response_data:
             return self._iter_line(response_data, **kwargs)
         else:
             return []
 
-    def get_iterator_pages(self, response_data, **kwargs):
+    def get_iterator_pages(self, response_data: Any, **kwargs: Any) -> List[Any]:
         if response_data:
             return [response_data]
         else:
             return []
 
-    def get_iterator_items(self, data, **kwargs):
+    def get_iterator_items(self, data: str, **kwargs: Any) -> Generator[str, None, None]:
         return self._iter_line(data, **kwargs)
 
-    def parts(self, max_parts=None, **kwargs):
+    def parts(self, max_parts: Optional[int] = None, **kwargs: Any) -> Generator[Any, None, None]:
         client = kwargs["client"]
         yield from client.pages(max_pages=max_parts)
 
-    def iter_lines(self, max_parts=None, max_rows=None, **kwargs):
+    def iter_lines(self, max_parts: Optional[int] = None, max_rows: Optional[int] = None, **kwargs: Any) -> Generator[str, None, None]:
         max_rows = max_rows or kwargs.get("max_items")
         client = kwargs["client"]
         yield from client.iter_items(max_pages=max_parts, max_items=max_rows)
 
-    def iter_values(self, max_parts=None, max_rows=None, **kwargs):
+    def iter_values(self, max_parts: Optional[int] = None, max_rows: Optional[int] = None, **kwargs: Any) -> Generator[List[str], None, None]:
         max_rows = max_rows or kwargs.get("max_items")
         client = kwargs["client"]
         for line in client.iter_items(max_pages=max_parts, max_items=max_rows):
             yield line.split("\t")
 
-    def iter_dicts(self, max_parts=None, max_rows=None, **kwargs):
+    def iter_dicts(self, max_parts: Optional[int] = None, max_rows: Optional[int] = None, **kwargs: Any) -> Generator[Dict[str, str], None, None]:
         max_rows = max_rows or kwargs.get("max_items")
         client = kwargs["client"]
         for values in client.iter_values(max_pages=max_parts, max_items=max_rows):
             yield dict(zip(kwargs["store"]["columns"], values))
 
-    def lines(self, max_rows=None, **kwargs):
+    def lines(self, max_rows: Optional[int] = None, **kwargs: Any) -> Generator[str, None, None]:
         max_rows = max_rows or kwargs.get("max_items")
         client = kwargs["client"]
         yield from client.items(max_items=max_rows)
 
-    def values(self, max_rows=None, **kwargs):
+    def values(self, max_rows: Optional[int] = None, **kwargs: Any) -> Generator[List[str], None, None]:
         max_rows = max_rows or kwargs.get("max_items")
         client = kwargs["client"]
         for line in client.items(max_items=max_rows):
             yield line.split("\t")
 
-    def dicts(self, max_rows=None, **kwargs):
+    def dicts(self, max_rows: Optional[int] = None, **kwargs: Any) -> Generator[Dict[str, str], None, None]:
         max_rows = max_rows or kwargs.get("max_items")
         client = kwargs["client"]
         for line in client.items(max_items=max_rows):
             yield dict(zip(kwargs["store"]["columns"], line.split("\t")))
 
-    def to_dicts(self, data, **kwargs):
+    def to_dicts(self, data: str, **kwargs: Any) -> List[Dict[str, str]]:
         return [
             dict(zip(kwargs["store"]["columns"], line.split("\t")))
             for line in data.split("\n")[1:]
             if line
         ]
 
-    def to_values(self, data, **kwargs):
+    def to_values(self, data: str, **kwargs: Any) -> List[List[str]]:
         return [line.split("\t") for line in data.split("\n")[1:] if line]
 
-    def to_lines(self, data, **kwargs):
+    def to_lines(self, data: str, **kwargs: Any) -> List[str]:
         return [line for line in data.split("\n")[1:] if line]
 
-    def to_columns(self, data, **kwargs):
-        columns = [[] for _ in range(len(kwargs["store"]["columns"]))]
+    def to_columns(self, data: str, **kwargs: Any) -> List[List[str]]:
+        columns: List[List[str]] = [[] for _ in range(len(kwargs["store"]["columns"]))]
         for line in self._iter_line(data, **kwargs):
             values = line.split("\t")
             for i, col in enumerate(columns):
@@ -351,7 +357,7 @@ class YandexMetrikaLogsapiClientAdapter(YandexMetrikaClientAdapterAbstract):
 class YandexMetrikaStatsClientAdapter(YandexMetrikaClientAdapterAbstract):
     resource_mapping = STATS_RESOURCE_MAPPING
 
-    def process_response(self, response, request_kwargs, **kwargs):
+    def process_response(self, response: Response, request_kwargs: Dict[str, Any], **kwargs: Any) -> Dict[str, Any]:
         data = super().process_response(response, request_kwargs, **kwargs)
         attribution = data["query"]["attribution"]
         sampled = data["sampled"]
@@ -376,17 +382,17 @@ class YandexMetrikaStatsClientAdapter(YandexMetrikaClientAdapterAbstract):
 
         return data
 
-    def _iter_transform_data(self, data):
+    def _iter_transform_data(self, data: Dict[str, Any]) -> Generator[List[Any], None, None]:
         for row in data["data"]:
             dimensions_data = [i["name"] for i in row["dimensions"]]
             metrics_data = row["metrics"]
             yield dimensions_data + metrics_data
 
-    def to_values(self, data, **kwargs):
+    def to_values(self, data: Dict[str, Any], **kwargs: Any) -> List[List[Any]]:
         return list(self._iter_transform_data(data))
 
-    def to_columns(self, data, **kwargs):
-        columns = None
+    def to_columns(self, data: Dict[str, Any], **kwargs: Any) -> Optional[List[List[Any]]]:
+        columns: Optional[List[List[Any]]] = None
         for row in self._iter_transform_data(data):
             if columns is None:
                 columns = [[] for _ in range(len(row))]
@@ -396,15 +402,15 @@ class YandexMetrikaStatsClientAdapter(YandexMetrikaClientAdapterAbstract):
 
         return columns
 
-    def to_dicts(self, data, **kwargs):
+    def to_dicts(self, data: Dict[str, Any], **kwargs: Any) -> List[Dict[str, Any]]:
         return [
             dict(zip(kwargs["store"]["columns"], row))
             for row in self._iter_transform_data(data)
         ]
 
     def get_iterator_next_request_kwargs(
-        self, response_data, response, request_kwargs, api_params, **kwargs
-    ):
+        self, response_data: Dict[str, Any], response: Response, request_kwargs: Dict[str, Any], api_params: Dict[str, Any], **kwargs: Any
+    ) -> Optional[Dict[str, Any]]:
         total_rows = int(response_data["total_rows"])
         limit = request_kwargs["params"].get("limit", LIMIT)
         offset = response_data["query"]["offset"] + limit
@@ -412,39 +418,40 @@ class YandexMetrikaStatsClientAdapter(YandexMetrikaClientAdapterAbstract):
         if offset <= total_rows:
             request_kwargs["params"]["offset"] = offset
             return request_kwargs
+        return None
 
-    def get_iterator_iteritems(self, response_data, **kwargs):
+    def get_iterator_iteritems(self, response_data: Dict[str, Any], **kwargs: Any) -> Generator[List[Any], None, None]:
         return self._iter_transform_data(response_data)
 
-    def get_iterator_pages(self, response_data, **kwargs):
+    def get_iterator_pages(self, response_data: Dict[str, Any], **kwargs: Any) -> List[Dict[str, Any]]:
         return [response_data]
 
-    def get_iterator_items(self, data, **kwargs):
+    def get_iterator_items(self, data: Dict[str, Any], **kwargs: Any) -> Generator[List[Any], None, None]:
         return self._iter_transform_data(data)
 
-    def iter_rows(self, max_pages=None, max_rows=None, **kwargs):
+    def iter_rows(self, max_pages: Optional[int] = None, max_rows: Optional[int] = None, **kwargs: Any) -> Generator[List[Any], None, None]:
         max_rows = max_rows or kwargs.get("max_items")
         client = kwargs["client"]
         yield from client.iter_items(max_pages=max_pages, max_items=max_rows)
 
-    def iter_values(self, max_pages=None, max_rows=None, **kwargs):
+    def iter_values(self, max_pages: Optional[int] = None, max_rows: Optional[int] = None, **kwargs: Any) -> Generator[List[Any], None, None]:
         return self.iter_rows(max_pages=max_pages, max_rows=max_rows, **kwargs)
 
-    def iter_dicts(self, max_pages=None, max_rows=None, **kwargs):
+    def iter_dicts(self, max_pages: Optional[int] = None, max_rows: Optional[int] = None, **kwargs: Any) -> Generator[Dict[str, Any], None, None]:
         for values in self.iter_values(
             max_pages=max_pages, max_rows=max_rows, **kwargs
         ):
             yield dict(zip(kwargs["store"]["columns"], values))
 
-    def rows(self, max_rows=None, **kwargs):
+    def rows(self, max_rows: Optional[int] = None, **kwargs: Any) -> Generator[List[Any], None, None]:
         max_rows = max_rows or kwargs.get("max_items")
         client = kwargs["client"]
         yield from client.items(max_items=max_rows)
 
-    def values(self, max_rows=None, **kwargs):
+    def values(self, max_rows: Optional[int] = None, **kwargs: Any) -> Generator[List[Any], None, None]:
         return self.rows(max_rows=max_rows, **kwargs)
 
-    def dicts(self, max_rows=None, **kwargs):
+    def dicts(self, max_rows: Optional[int] = None, **kwargs: Any) -> Generator[Dict[str, Any], None, None]:
         for values in self.values(max_rows=max_rows, **kwargs):
             yield dict(zip(kwargs["store"]["columns"], values))
 
