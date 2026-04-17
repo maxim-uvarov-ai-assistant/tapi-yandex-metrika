@@ -1,18 +1,18 @@
-from typing import Union, List, Iterator
+from typing import Union, List, Iterator, Optional
 
 from requests import Response
 
 
 class YandexMetrikaBaseMethods:
     @property
-    def data(self) -> dict: ...
+    def data(self) -> Union[dict, list, str]: ...
     @property
     def request_kwargs(self) -> dict: ...
     @property
     def response(self) -> Response: ...
     @property
     def status_code(self) -> int: ...
-    def __getitem__(self, item) -> Union[dict, list]: ...
+    def __getitem__(self, item: Union[str, int]) -> Union[dict, list]: ...
     def __iter__(self) -> Iterator: ...
 
 class YandexMetrikaClientExecutor:
@@ -23,7 +23,7 @@ class YandexMetrikaClientExecutor:
     def help(self) -> YandexMetrikaClientExecutor:
         """Print docs of resource."""
     def get(
-        self, *, params: dict = None, data: dict = None, headers: dict = None
+        self, *, params: Optional[dict] = None, data: Optional[dict] = None, headers: Optional[dict] = None
     ) -> YandexMetrikaBaseMethods:
         """
         Send HTTP 'GET' request.
@@ -32,7 +32,7 @@ class YandexMetrikaClientExecutor:
         :param data: send data in the body of the request
         """
     def post(
-        self, *, params: dict = None, data: dict = None, headers: dict = None
+        self, *, params: Optional[dict] = None, data: Optional[dict] = None, headers: Optional[dict] = None
     ) -> YandexMetrikaBaseMethods:
         """
         Send HTTP 'POST' request.
@@ -41,7 +41,7 @@ class YandexMetrikaClientExecutor:
         :param data: send data in the body of the request
         """
     def put(
-        self, *, params: dict = None, data: dict = None, headers: dict = None
+        self, *, params: Optional[dict] = None, data: Optional[dict] = None, headers: Optional[dict] = None
     ) -> YandexMetrikaBaseMethods:
         """
         Send HTTP 'PUT' request.
@@ -50,7 +50,7 @@ class YandexMetrikaClientExecutor:
         :param data: send data in the body of the request
         """
     def putch(
-        self, *, params: dict = None, data: dict = None, headers: dict = None
+        self, *, params: Optional[dict] = None, data: Optional[dict] = None, headers: Optional[dict] = None
     ) -> YandexMetrikaBaseMethods:
         """
         Send HTTP 'PUTCH' request.
@@ -59,7 +59,7 @@ class YandexMetrikaClientExecutor:
         :param data: send data in the body of the request
         """
     def delete(
-        self, *, params: dict = None, data: dict = None, headers: dict = None
+        self, *, params: Optional[dict] = None, data: Optional[dict] = None, headers: Optional[dict] = None
     ) -> YandexMetrikaBaseMethods:
         """
         Send HTTP 'DELETE' request.
@@ -68,7 +68,7 @@ class YandexMetrikaClientExecutor:
         :param data: send data in the body of the request
         """
     def options(
-        self, *, params: dict = None, data: dict = None, headers: dict = None
+        self, *, params: Optional[dict] = None, data: Optional[dict] = None, headers: Optional[dict] = None
     ) -> YandexMetrikaBaseMethods:
         """
         Send HTTP 'OPTIONS' request.
@@ -80,7 +80,7 @@ class YandexMetrikaClientExecutor:
 # Management
 
 class YandexMetrikaManagement:
-    def __init__(self, *, access_token: str, default_url_params: dict = None):
+    def __init__(self, *, access_token: str, default_url_params: Optional[dict] = None):
         """
         :param access_token: Access token.
         :param default_url_params: {"counterId": <int>}
@@ -103,7 +103,7 @@ class YandexMetrikaManagement:
         & [type=<counter_type>]
         """
     def counter(
-        self, *, counterId: Union[str, int] = None
+        self, *, counterId: Optional[Union[str, int]] = None
     ) -> YandexMetrikaClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/management/counters/counter-docpage/
@@ -111,7 +111,7 @@ class YandexMetrikaManagement:
         GET params a resource: [callback=<string>] & [field=<string>]
         """
     def counter_undelete(
-        self, *, counterId: Union[str, int] = None
+        self, *, counterId: Optional[Union[str, int]] = None
     ) -> YandexMetrikaClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/management/counters/undeletecounter-docpage/
@@ -119,7 +119,7 @@ class YandexMetrikaManagement:
         GET params a resource:
         """
     def goals(
-        self, *, counterId: Union[str, int] = None
+        self, *, counterId: Optional[Union[str, int]] = None
     ) -> YandexMetrikaClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/management/goals/goals-docpage/
@@ -127,7 +127,7 @@ class YandexMetrikaManagement:
         GET params a resource: [callback=<string>] & [useDeleted=<boolean>]
         """
     def goal(
-        self, *, goalId: Union[str, int], counterId: Union[str, int] = None
+        self, *, goalId: Union[str, int], counterId: Optional[Union[str, int]] = None
     ) -> YandexMetrikaClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/management/goals/goal-docpage/
@@ -147,7 +147,7 @@ class YandexMetrikaManagement:
         GET params a resource: counters=<list>
         """
     def filters(
-        self, *, counterId: Union[str, int] = None
+        self, *, counterId: Optional[Union[str, int]] = None
     ) -> YandexMetrikaClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/management/filters/filters-docpage/
@@ -155,7 +155,7 @@ class YandexMetrikaManagement:
         GET params a resource: [callback=<string>]
         """
     def filter(
-        self, *, filterId: Union[str, int], counterId: Union[str, int] = None
+        self, *, filterId: Union[str, int], counterId: Optional[Union[str, int]] = None
     ) -> YandexMetrikaClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/management/filters/filter-docpage/
@@ -163,7 +163,7 @@ class YandexMetrikaManagement:
         GET params a resource: [callback=<string>]
         """
     def operations(
-        self, *, counterId: Union[str, int] = None
+        self, *, counterId: Optional[Union[str, int]] = None
     ) -> YandexMetrikaClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/management/operations/operations-docpage/
@@ -171,7 +171,7 @@ class YandexMetrikaManagement:
         GET params a resource: [callback=<string>]
         """
     def operation(
-        self, *, operationId: Union[str, int], counterId: Union[str, int] = None
+        self, *, operationId: Union[str, int], counterId: Optional[Union[str, int]] = None
     ) -> YandexMetrikaClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/management/operations/operation-docpage/
@@ -179,7 +179,7 @@ class YandexMetrikaManagement:
         GET params a resource: [callback=<string>]
         """
     def grants(
-        self, *, counterId: Union[str, int] = None
+        self, *, counterId: Optional[Union[str, int]] = None
     ) -> YandexMetrikaClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/management/grants/grants-docpage/
@@ -187,7 +187,7 @@ class YandexMetrikaManagement:
         GET params a resource: [callback=<string>]
         """
     def grant(
-        self, *, counterId: Union[str, int] = None
+        self, *, counterId: Optional[Union[str, int]] = None
     ) -> YandexMetrikaClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/management/grants/grant-docpage/
@@ -195,7 +195,7 @@ class YandexMetrikaManagement:
         GET params a resource: user_login=<string>
         """
     def public_grant(
-        self, *, counterId: Union[str, int] = None
+        self, *, counterId: Optional[Union[str, int]] = None
     ) -> YandexMetrikaClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/management/public-grants/addgrant-docpage/
@@ -227,7 +227,7 @@ class YandexMetrikaManagement:
         GET params a resource: None
         """
     def set_counter_label(
-        self, *, labelId: Union[str, int], counterId: Union[str, int] = None
+        self, *, labelId: Union[str, int], counterId: Optional[Union[str, int]] = None
     ) -> YandexMetrikaClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/management/links/setcounterlabel-docpage/
@@ -235,7 +235,7 @@ class YandexMetrikaManagement:
         GET params a resource: None
         """
     def segments(
-        self, *, counterId: Union[str, int] = None
+        self, *, counterId: Optional[Union[str, int]] = None
     ) -> YandexMetrikaClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/management/segments/getsegmentsforcounter-docpage/
@@ -243,7 +243,7 @@ class YandexMetrikaManagement:
         GET params a resource: None
         """
     def segment(
-        self, *, segmentId: Union[str, int], counterId: Union[str, int] = None
+        self, *, segmentId: Union[str, int], counterId: Optional[Union[str, int]] = None
     ) -> YandexMetrikaClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/management/segments/getsegment-docpage/
@@ -251,7 +251,7 @@ class YandexMetrikaManagement:
         GET params a resource: None
         """
     def user_params_uploadings(
-        self, *, counterId: Union[str, int] = None
+        self, *, counterId: Optional[Union[str, int]] = None
     ) -> YandexMetrikaClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/management/userparams/findall-docpage/
@@ -259,7 +259,7 @@ class YandexMetrikaManagement:
         GET params a resource: None
         """
     def user_params_uploading(
-        self, *, uploadingId: Union[str, int], counterId: Union[str, int] = None
+        self, *, uploadingId: Union[str, int], counterId: Optional[Union[str, int]] = None
     ) -> YandexMetrikaClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/management/userparams/findbyid-docpage/
@@ -267,7 +267,7 @@ class YandexMetrikaManagement:
         GET params a resource: None
         """
     def user_params_upload(
-        self, *, counterId: Union[str, int] = None
+        self, *, counterId: Optional[Union[str, int]] = None
     ) -> YandexMetrikaClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/management/userparams/upload-docpage/
@@ -275,7 +275,7 @@ class YandexMetrikaManagement:
         GET params a resource: action=<user_params_uploading_action>
         """
     def user_params_uploading_confirm(
-        self, *, uploadingId: Union[str, int], counterId: Union[str, int] = None
+        self, *, uploadingId: Union[str, int], counterId: Optional[Union[str, int]] = None
     ) -> YandexMetrikaClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/management/userparams/confirm-docpage/
@@ -283,7 +283,7 @@ class YandexMetrikaManagement:
         GET params a resource: None
         """
     def chart_annotations(
-        self, *, counterId: Union[str, int] = None
+        self, *, counterId: Optional[Union[str, int]] = None
     ) -> YandexMetrikaClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/management/chart_annotation/findall-docpage/
@@ -291,7 +291,7 @@ class YandexMetrikaManagement:
         GET params a resource: None
         """
     def chart_annotation(
-        self, *, Id: Union[str, int], counterId: Union[str, int] = None
+        self, *, Id: Union[str, int], counterId: Optional[Union[str, int]] = None
     ) -> YandexMetrikaClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/management/chart_annotation/get-docpage/
@@ -299,7 +299,7 @@ class YandexMetrikaManagement:
         GET params a resource: None
         """
     def yclid_conversions_uploadings(
-        self, *, counterId: Union[str, int] = None
+        self, *, counterId: Optional[Union[str, int]] = None
     ) -> YandexMetrikaClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/management/yclid-conversion/findall-docpage/
@@ -307,7 +307,7 @@ class YandexMetrikaManagement:
         GET params a resource: [limit=<integer>] & [offset=<integer>
         """
     def yclid_conversions_uploading(
-        self, *, Id: Union[str, int], counterId: Union[str, int] = None
+        self, *, Id: Union[str, int], counterId: Optional[Union[str, int]] = None
     ) -> YandexMetrikaClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/management/yclid-conversion/findbyid-docpage/
@@ -315,7 +315,7 @@ class YandexMetrikaManagement:
         GET params a resource: None
         """
     def yclid_conversions_upload(
-        self, *, counterId: Union[str, int] = None
+        self, *, counterId: Optional[Union[str, int]] = None
     ) -> YandexMetrikaClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/management/yclid-conversion/upload-docpage/
@@ -323,7 +323,7 @@ class YandexMetrikaManagement:
         GET params a resource: [comment=<string>]
         """
     def offline_conversions_uploadings(
-        self, *, counterId: Union[str, int] = None
+        self, *, counterId: Optional[Union[str, int]] = None
     ) -> YandexMetrikaClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/management/offline_conversion/findall-docpage/
@@ -331,7 +331,7 @@ class YandexMetrikaManagement:
         GET params a resource: None
         """
     def offline_conversions_calls_uploadings(
-        self, *, counterId: Union[str, int] = None
+        self, *, counterId: Optional[Union[str, int]] = None
     ) -> YandexMetrikaClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/management/offline_conversion/findallcalluploadings-docpage/
@@ -339,7 +339,7 @@ class YandexMetrikaManagement:
         GET params a resource: None
         """
     def offline_conversions_uploading(
-        self, *, Id: Union[str, int], counterId: Union[str, int] = None
+        self, *, Id: Union[str, int], counterId: Optional[Union[str, int]] = None
     ) -> YandexMetrikaClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/management/offline_conversion/findbyid-docpage/
@@ -347,7 +347,7 @@ class YandexMetrikaManagement:
         GET params a resource: None
         """
     def offline_conversions_calls_uploading(
-        self, *, Id: Union[str, int], counterId: Union[str, int] = None
+        self, *, Id: Union[str, int], counterId: Optional[Union[str, int]] = None
     ) -> YandexMetrikaClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/management/offline_conversion/findcalluploadingbyid-docpage/
@@ -355,7 +355,7 @@ class YandexMetrikaManagement:
         GET params a resource: None
         """
     def offline_conversions_upload(
-        self, *, counterId: Union[str, int] = None
+        self, *, counterId: Optional[Union[str, int]] = None
     ) -> YandexMetrikaClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/management/offline_conversion/upload-docpage/
@@ -363,7 +363,7 @@ class YandexMetrikaManagement:
         GET params a resource: client_id_type=<offline_conversion_uploading_client_id_type> & [comment=<string>]
         """
     def offline_conversions_upload_calls(
-        self, *, counterId: Union[str, int] = None
+        self, *, counterId: Optional[Union[str, int]] = None
     ) -> YandexMetrikaClientExecutor:
         """
            https://yandex.ru/dev/metrika/doc/api2/management/offline_conversion/uploadcalls-docpage/
@@ -373,7 +373,7 @@ class YandexMetrikaManagement:
         & [new_goal_name=<string>]
         """
     def offline_conversions_extended_threshold(
-        self, *, counterId: Union[str, int] = None
+        self, *, counterId: Optional[Union[str, int]] = None
     ) -> YandexMetrikaClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/management/offline_conversion/enableextendedthreshold-docpage/
@@ -381,7 +381,7 @@ class YandexMetrikaManagement:
         GET params a resource: None
         """
     def offline_conversions_calls_extended_threshold(
-        self, *, counterId: Union[str, int] = None
+        self, *, counterId: Optional[Union[str, int]] = None
     ) -> YandexMetrikaClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/management/offline_conversion/enablecallsextendedthreshold-docpage/
@@ -395,21 +395,21 @@ class YandexMetrikaStatsPageIteratorResponse(YandexMetrikaBaseMethods):
     def to_values(self) -> List[tuple]: ...
     def to_columns(self) -> List[list]: ...
     def to_dicts(self) -> List[dict]: ...
-    def values(self, *, max_rows: int = None) -> Iterator[list]: ...
-    def dicts(self, *, max_rows: int = None) -> Iterator[dict]: ...
+    def values(self, *, max_rows: Optional[int] = None) -> Iterator[list]: ...
+    def dicts(self, *, max_rows: Optional[int] = None) -> Iterator[dict]: ...
 
 class YandexMetrikaStatsPageIteratorExecutor(YandexMetrikaBaseMethods):
     def __call__(self) -> YandexMetrikaStatsPageIteratorResponse: ...
 
 class YandexMetrikaStatsResponse(YandexMetrikaBaseMethods):
     def pages(
-        self, *, max_pages: int = None
+        self, *, max_pages: Optional[int] = None
     ) -> Iterator[YandexMetrikaStatsPageIteratorExecutor]: ...
     def iter_values(
-        self, *, max_pages: int = None, max_rows: int = None
+        self, *, max_pages: Optional[int] = None, max_rows: Optional[int] = None
     ) -> Iterator[list]: ...
     def iter_dicts(
-        self, *, max_pages: int = None, max_rows: int = None
+        self, *, max_pages: Optional[int] = None, max_rows: Optional[int] = None
     ) -> Iterator[dict]: ...
     def to_values(self) -> List[list]: ...
     def to_columns(self) -> List[list]: ...
@@ -427,7 +427,7 @@ class YandexMetrikaStatsClientExecutor:
         """Send a request in the browser."""
     def help(self) -> YandexMetrikaStatsClientExecutor:
         """Print docs of resource."""
-    def get(self, *, params: dict = None) -> YandexMetrikaStatsClientExecutorResponse:
+    def get(self, *, params: Optional[dict] = None) -> YandexMetrikaStatsClientExecutorResponse:
         """
         https://yandex.ru/dev/metrika/doc/api2/api_v1/data.html
 
@@ -451,9 +451,9 @@ class YandexMetrikaLogsapiPageIteratorResponse(YandexMetrikaBaseMethods):
     def to_columns(self) -> List[list]: ...
     def to_dicts(self) -> List[dict]: ...
     def to_lines(self) -> List[str]: ...
-    def values(self, *, max_rows: int = None) -> Iterator[list]: ...
-    def dicts(self, *, max_rows: int = None) -> Iterator[dict]: ...
-    def lines(self, *, max_rows: int = None) -> Iterator[str]: ...
+    def values(self, *, max_rows: Optional[int] = None) -> Iterator[list]: ...
+    def dicts(self, *, max_rows: Optional[int] = None) -> Iterator[dict]: ...
+    def lines(self, *, max_rows: Optional[int] = None) -> Iterator[str]: ...
 
 class YandexMetrikaLogsapiPageIteratorExecutor(YandexMetrikaBaseMethods):
     @property
@@ -464,16 +464,16 @@ class YandexMetrikaLogsapiResponse(YandexMetrikaBaseMethods):
     @property
     def data(self) -> str: ...
     def parts(
-        self, *, max_parts: int = None
+        self, *, max_parts: Optional[int] = None
     ) -> Iterator[YandexMetrikaLogsapiPageIteratorExecutor]: ...
     def iter_lines(
-        self, *, max_parts: int = None, max_rows: int = None
+        self, *, max_parts: Optional[int] = None, max_rows: Optional[int] = None
     ) -> Iterator[str]: ...
     def iter_values(
-        self, *, max_parts: int = None, max_rows: int = None
+        self, *, max_parts: Optional[int] = None, max_rows: Optional[int] = None
     ) -> Iterator[list]: ...
     def iter_dicts(
-        self, *, max_parts: int = None, max_rows: int = None
+        self, *, max_parts: Optional[int] = None, max_rows: Optional[int] = None
     ) -> Iterator[dict]: ...
     def to_values(self) -> List[list]: ...
     def to_columns(self) -> List[list]: ...
@@ -495,7 +495,7 @@ class YandexMetrikaLogsapiClientExecutor:
     def help(self) -> YandexMetrikaLogsapiClientExecutor:
         """Print docs of resource."""
     def get(
-        self, *, params: dict = None, data: dict = None, headers: dict = None
+        self, *, params: Optional[dict] = None, data: Optional[dict] = None, headers: Optional[dict] = None
     ) -> YandexMetrikaLogsapiClientExecutorResponse:
         """
         Send HTTP 'GET' request.
@@ -504,7 +504,7 @@ class YandexMetrikaLogsapiClientExecutor:
         :param data: send data in the body of the request
         """
     def post(
-        self, *, params: dict = None, data: dict = None, headers: dict = None
+        self, *, params: Optional[dict] = None, data: Optional[dict] = None, headers: Optional[dict] = None
     ) -> YandexMetrikaLogsapiClientExecutorResponse:
         """
         Send HTTP 'POST' request.
@@ -518,7 +518,7 @@ class YandexMetrikaLogsapi:
         self,
         *,
         access_token: str,
-        default_url_params: dict = None,
+        default_url_params: Optional[dict] = None,
         wait_report: bool = False,
     ):
         """
@@ -532,7 +532,7 @@ class YandexMetrikaLogsapi:
         Allowed HTTP methods for requesting a resource: GET
         """
     def info(
-        self, *, requestId: Union[int, str], counterId: Union[int, str] = None
+        self, *, requestId: Union[int, str], counterId: Optional[Union[int, str]] = None
     ) -> YandexMetrikaLogsapiClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/logs/queries/getlogrequest-docpage/
@@ -543,28 +543,28 @@ class YandexMetrikaLogsapi:
         *,
         requestId: Union[int, str],
         partNumber: int = 0,
-        counterId: Union[int, str] = None,
+        counterId: Optional[Union[int, str]] = None,
     ) -> YandexMetrikaLogsapiClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/logs/queries/download-docpage/
         Allowed HTTP methods for requesting a resource: GET
         """
     def clean(
-        self, *, requestId: Union[int, str], counterId: Union[int, str] = None
+        self, *, requestId: Union[int, str], counterId: Optional[Union[int, str]] = None
     ) -> YandexMetrikaLogsapiClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/logs/queries/clean-docpage/
         Allowed HTTP methods for requesting a resource: POST
         """
     def cancel(
-        self, *, requestId: Union[int, str], counterId: Union[int, str] = None
+        self, *, requestId: Union[int, str], counterId: Optional[Union[int, str]] = None
     ) -> YandexMetrikaLogsapiClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/logs/queries/cancel-docpage/
         Allowed HTTP methods for requesting a resource: POST
         """
     def create(
-        self, *, counterId: Union[int, str] = None
+        self, *, counterId: Optional[Union[int, str]] = None
     ) -> YandexMetrikaLogsapiClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/logs/queries/createlogrequest-docpage/
@@ -572,7 +572,7 @@ class YandexMetrikaLogsapi:
         GET params a resource: ['date1', 'date2', 'fields', 'source']
         """
     def evaluate(
-        self, *, counterId: Union[int, str] = None
+        self, *, counterId: Optional[Union[int, str]] = None
     ) -> YandexMetrikaLogsapiClientExecutor:
         """
         https://yandex.ru/dev/metrika/doc/api2/logs/queries/evaluate-docpage/
